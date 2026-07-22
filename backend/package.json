@@ -12,7 +12,13 @@
   "type": "commonjs",
   "dependencies": {
     "axios": "^1.18.1",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "dotenv": "^17.4.2",
+    "expo": "~57.0.4",
+    "express": "^5.2.1",
+    "pensador-api": "^1.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.0"
   }
 }
