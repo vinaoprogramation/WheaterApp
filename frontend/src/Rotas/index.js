@@ -7,7 +7,6 @@ import Login from '../Telas/Login';
 import Registro from '../Telas/Registro';
 import Inicial from '../Telas/Inicial';
 import Configs from '../Telas/Configs';
-
 const Tab = createNativeStackNavigator();
 
 

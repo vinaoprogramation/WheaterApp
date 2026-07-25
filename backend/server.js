@@ -14,49 +14,146 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api', async (req, res) => {
-  try {
-    const response = await axios.get(
-      'https://api.open-meteo.com/v1/forecast?latitude=-24.5475&longitude=-51.6361&hourly=temperature_2m&timezone=auto'
-    );
-
-    const temperatura = response.data?.hourly?.temperature_2m?.[0];
-
-    return res.status(200).json({
-      Temperatura: temperatura,
-    });
-  } catch (error) {
-    console.error('Erro ao buscar temperatura padrão:', error.message);
-    return res.status(500).json({ error: 'Erro ao buscar temperatura padrão' });
-  }
-});
-
-app.get('/api/:latitude/:longitude/:hora', async (req, res) => {
+app.get('/api/:latitude/:longitude', async (req, res) => {
   try {
     const latitude = Number(req.params.latitude);
     const longitude = Number(req.params.longitude);
-    const hora = Number(req.params.hora);
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return res.status(400).json({ error: 'Parâmetros inválidos' });
     }
 
-    const indiceHora = Math.max(0, Math.min(23, Math.floor(hora)));
-
     const response = await axios.get(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m&timezone=auto`
+      `https://api.weatherapi.com/v1/current.json?key=${process.env.TEMPERATURE_KEY}&q=${latitude},${longitude}&aqi=yes`
     );
 
-    const temperatura = response.data?.hourly?.temperature_2m?.[indiceHora];
+    const data = response.data?.location?.localtime;
+    const temperatura = response.data?.current?.temp_c;
+    const humidade = response.data?.current.humidity;
+    const sensacaoTermica = response.data?.current.feelslike_c;
+    const condicaoClimatica = response.data?.current?.condition?.text;
+    const velocidadeVento = response.data?.current?.wind_kph;
+    const qualidadeArCo = response.data?.current?.air_quality?.co;
+    const qualidadeArNo2 = response.data?.current?.air_quality?.no2;
+    const indiceUv = response.data?.current?.uv;
 
     return res.status(200).json({
+      Data: data,
       Temperatura: temperatura,
+      Humidade: humidade,
+      SensacaoTermica: sensacaoTermica,
+      CondicaoClimatica: condicaoClimatica,
+      VelocidadeVento: velocidadeVento,
+      QualidadeArCo: qualidadeArCo,
+      QualidadeArNo2: qualidadeArNo2,
+      IndiceUv: indiceUv,
     });
   } catch (error) {
-    console.error('Erro ao buscar temperatura por coordenadas:', error.message);
-    return res.status(500).json({ error: 'Erro ao buscar temperatura' });
+    console.error('Erro ao buscar informações de clima por coordenadas:', error.message);
+    return res.status(500).json({ error: 'Erro ao buscar informações' });
   }
 });
+
+
+
+
+
+app.get('/forecast/:latitude/:longitude', async (req, res) => {
+  try {
+    const latitude = Number(req.params.latitude);
+    const longitude = Number(req.params.longitude);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return res.status(400).json({ error: 'Parâmetros inválidos' });
+    }
+
+    const response = await axios.get(
+      `https://api.weatherapi.com/v1/forecast.json?key=${process.env.TEMPERATURE_KEY}&q=${latitude},${longitude}&days=3&aqi=yes&alerts=no`
+    );
+
+    const dayOne = response.data?.forecast?.forecastday?.[0]
+    const dayTwo = response.data?.forecast?.forecastday?.[1]
+    const dayThree = response.data?.forecast?.forecastday?.[2]
+
+    const informacoesDiaUm = {
+
+      data: dayOne?.date,
+      temperaturaMax: dayOne?.day?.maxtemp_c,
+      temperaturaMin: dayOne?.day?.mintemp_c,
+      temperaturaMedia: dayOne?.day?.avgtemp_c,
+      ventoMax: dayOne?.day?.maxwind_kph,
+      miliChuva: dayOne?.day?.totalprecip_mm,
+      chanceChuva: dayOne?.day?.daily_chance_of_rain,
+      indiceUv: dayOne?.day?.uv,
+      condicaoClimatica: dayOne?.day?.condition?.text,
+      qualidadeArCo: dayOne?.day?.air_quality?.co,
+      qualidadeArNo2: dayOne?.day?.air_quality?.no2,
+      nascerSol: dayOne?.astro?.sunrise,
+      porSol: dayOne?.astro?.sunset,
+      nascerLua: dayOne?.astro?.moonrise,
+      porLua: dayOne?.astro?.monset,
+      faseLua: dayOne?.astro?.moon_phase,
+
+    };
+
+    const informacoesDiaDois = {
+
+      data: dayTwo?.date,
+      temperaturaMax: dayTwo?.day?.maxtemp_c,
+      temperaturaMin: dayTwo?.day?.mintemp_c,
+      temperaturaMedia: dayTwo?.day?.avgtemp_c,
+      ventoMax: dayTwo?.day?.maxwind_kph,
+      miliChuva: dayTwo?.day?.totalprecip_mm,
+      chanceChuva: dayTwo?.day?.daily_chance_of_rain,
+      indiceUv: dayTwo?.day?.uv,
+      condicaoClimatica: dayTwo?.day?.condition?.text,
+      qualidadeArCo: dayTwo?.day?.air_quality?.co,
+      qualidadeArNo2: dayTwo?.day?.air_quality?.no2,
+      nascerSol: dayTwo?.astro?.sunrise,
+      porSol: dayTwo?.astro?.sunset,
+      nascerLua: dayTwo?.astro?.moonrise,
+      porLua: dayTwo?.astro?.monset,
+      faseLua: dayTwo?.astro?.moon_phase,
+
+    };
+
+
+    const informacoesDiaTres = {
+
+      data: dayThree?.date,
+      temperaturaMax: dayThree?.day?.maxtemp_c,
+      temperaturaMin: dayThree?.day?.mintemp_c,
+      temperaturaMedia: dayThree?.day?.avgtemp_c,
+      ventoMax: dayThree?.day?.maxwind_kph,
+      miliChuva: dayThree?.day?.totalprecip_mm,
+      chanceChuva: dayThree?.day?.daily_chance_of_rain,
+      indiceUv: dayThree?.day?.uv,
+      condicaoClimatica: dayThree?.day?.condition?.text,
+      qualidadeArCo: dayThree?.day?.air_quality?.co,
+      qualidadeArNo2: dayThree?.day?.air_quality?.no2,
+      nascerSol: dayThree?.astro?.sunrise,
+      porSol: dayThree?.astro?.sunset,
+      nascerLua: dayThree?.astro?.moonrise,
+      porLua: dayThree?.astro?.monset,
+      faseLua: dayThree?.astro?.moon_phase,
+
+    };
+
+
+
+
+
+    return res.status(200).json({
+      diaUm: informacoesDiaUm,
+      diaDois: informacoesDiaDois,
+      diaTres: informacoesDiaTres,
+    });
+  } catch (error) {
+    console.error('Erro ao buscar previsão do tempo por coordenadas:', error.message);
+    return res.status(500).json({ error: 'Erro ao buscar previsão' });
+  }
+});
+
 
 
 
@@ -69,8 +166,7 @@ app.get('/revgeocoding/:latitude/:longitude', async (req, res) => {
       return res.status(400).json({ error: 'Parâmetros inválidos' });
     }
 
-    const response = await axios.get(
-    );
+    const response = await axios.get(`https://us1.locationiq.com/v1/reverse?key=${process.env.REVERSE_KEY}&lat=${latitude}&lon=${longitude}&format=json&`);
 
     const answer = response.data;
 
@@ -159,3 +255,6 @@ app.get('/quotes/translated', async (req, res) => {
 app.listen(3000, () => {
   console.log('API funcionando em http://localhost:3000');
 });
+
+
+//4d629200f15b411c83b150719262307

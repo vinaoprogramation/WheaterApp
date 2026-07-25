@@ -14,6 +14,7 @@ const QuotesAndTranslation = create((set) => ({
         throw new Error(`Falha na requisição: ${response.status}`);
       }
       const answer = await response.json();
+      console.log(answer)
       set({ frase: answer.Quote });
 
     } catch (err) {
