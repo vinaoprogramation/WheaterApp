@@ -12,7 +12,8 @@ export default {
       "supportsTablet": true,
       "config": {
         "googleMapsApiKey": process.env.GOOGLE_MAPS_API_KEY
-      }
+      },
+      "bundleIdentifier": "com.liuhtad.WheatherAPP"
     },
     "android": {
       "adaptiveIcon": {

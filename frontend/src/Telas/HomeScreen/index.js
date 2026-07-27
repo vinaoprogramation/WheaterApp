@@ -312,7 +312,7 @@ export default function HomeScreen({navigation}) {
               decelerationRate={0.600}
               data={condicoesFuturas}
               style={styles.flatList}
-              keyExtractor={(item) => item.data}
+              keyExtractor={(item) => item}
               horizontal
               showsHorizontalScrollIndicator={false}
               scrollEnabled={true}
@@ -342,6 +342,7 @@ export default function HomeScreen({navigation}) {
                         {item.chanceChuva}%
                       </Animated.Text>
 
+=
 
                     </View>
 

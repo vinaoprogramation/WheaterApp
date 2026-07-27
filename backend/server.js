@@ -2,7 +2,13 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const https = require('https'); // Importe o módulo nativo https
 require('dotenv').config();
+
+const httpsAgent = new https.Agent({  
+  rejectUnauthorized: false 
+});
+
 
 const app = express();
 app.use(express.json());
@@ -188,6 +194,8 @@ app.get('/quotes', async (req, res) => {
       autor: item.a,
     }));
 
+    console.log(quote?.[0])
+
     return res.status(200).json({
       Quote: quote?.[0],
     });
@@ -209,7 +217,8 @@ app.post('/translate', async (req, res) => {
         headers: {
           'Authorization': `DeepL-Auth-Key ${process.env.API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        httpsAgent: httpsAgent // Passa o agente aqui
       }
     );
     return res.status(200).json({ Translation: response.data.translations[0].text });
@@ -237,7 +246,9 @@ app.get('/quotes/translated', async (req, res) => {
         headers: {
           'Authorization': `DeepL-Auth-Key ${process.env.API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        httpsAgent: httpsAgent // Passa o agente aqui
+
       }
     )
 
@@ -256,5 +267,3 @@ app.listen(3000, () => {
   console.log('API funcionando em http://localhost:3000');
 });
 
-
-//4d629200f15b411c83b150719262307

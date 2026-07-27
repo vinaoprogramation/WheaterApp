@@ -17,6 +17,7 @@
     "dotenv": "^17.4.2",
     "expo": "~57.0.4",
     "express": "^5.2.1",
+    "https": "^1.0.0",
     "pensador-api": "^1.0.1",
     "react": "19.2.3",
     "react-native": "0.86.0"
