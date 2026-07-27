@@ -134,13 +134,13 @@ const styles = StyleSheet.create({
     verticalAlign: 'middle'
   },
   previsao: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#000000',
     width: width,
     alignSelf: 'center',
     zIndex: 0,
-    borderRadius: 8,
-    marginBottom: 100,
+    
     paddingVertical: 20,
+    paddingBottom: 200
   },
   tituloPrevisao: {
     fontSize: 40,
@@ -150,9 +150,9 @@ const styles = StyleSheet.create({
     zIndex: 1
   },
   conteudoPrevisao: {
-    backgroundColor: '#ffffff41',
+    backgroundColor: '#ffffff00',
     zIndex: 1,
-    width: width * 0.9,
+    width: width,
     alignSelf: 'center',
     borderRadius: 15,
     padding: 10,
@@ -161,25 +161,22 @@ const styles = StyleSheet.create({
   },
   flatList: {
     shadowColor: '#ffffff',
-    width: width*0.9,
+    width: width,
     alignSelf: 'center'
   },
   dataView:{
     marginVertical: 20
   },
   dataFlat:{
-    color: '#337dd1',
+    color: '#aed4ff',
     fontSize: 40,
-    textAlign: 'center',
+    textAlign: 'left',
     fontWeight: 'bold',
-    backgroundColor: '#82bafa',
     width: 200,
-    alignSelf: 'center',
-    borderRadius: 30,
-    elevation: 5,
-    textShadowColor: '#0000003a',
-    textShadowRadius: 5,
-    textShadowOffset: {width: 1, height: 1}
+    textShadowColor: '#ffffff3a',
+    textShadowRadius: 3,
+    textShadowOffset: {width: 1, height: 1},
+    marginLeft: 15
   }
 
 });

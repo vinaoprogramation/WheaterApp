@@ -21,7 +21,7 @@ import serenoLogo from '../../../assets/serenoLogo.png';
 import nuvensFundo from "../../../assets/nuvensFundo.jpg"
 
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
   //USE STATES
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const [horaFormatada, setHoraFormatada] = useState(null);
   const [hora, setHora] = useState(null);
   const [dataFormatada, setDataFormatada] = useState(null)
-  const [detalhes, setDetalhes] = useState(false)
+
   //CONSTANTES NATIVAS
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -304,107 +304,12 @@ export default function HomeScreen() {
 
 
 
-            {detalhes? (<FlatList
-              snapToInterval={width * 0.9 + 16}
-              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+
+            <FlatList
+              snapToInterval={width}
               disableIntervalMomentum
               snapToAlignment="start"
-              decelerationRate={0.450}
-              data={condicoesFuturas}
-              style={styles.flatListDetalhes}
-              keyExtractor={(item) => item.data}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              scrollEnabled={false}
-              renderItem={({ item }) => <>
-                <TouchableOpacity
-                onPress={() => {
-                  setDetalhes(!detalhes)
-                }}
-                >
-
-              
-                  <View style={styles.conteudoPrevisao}>
-                    <View style={styles.dataView}>
-
-                      <Animated.Text style={[styles.dataFlat, { opacity: fadeAnim }]}>
-                        Detalhes
-                      </Animated.Text>
-
-
-                      <Animated.Text style={[styles.dataFlat, { opacity: fadeAnim }]}>
-                        {`${item?.data?.split('-')[2]}/${item?.data?.split('-')[1]}`}
-                      </Animated.Text>
-
-
-                    </View>
-
-                    <View style={styles.informacoes}>
-                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
-                        Chance de Chuva
-                      </Animated.Text>
-
-                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
-                        {item.chanceChuva}%
-                      </Animated.Text>
-
-
-                    </View>
-
-
-                    <View style={styles.informacoes}>
-                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
-                        Quantidade de Chuva
-                      </Animated.Text>
-
-                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
-                        {item.miliChuva}mm
-                      </Animated.Text>
-
-
-                    </View>
-
-
-
-                    <View style={styles.informacoes}>
-                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
-                        Temperatura Máxima
-                      </Animated.Text>
-
-                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
-                        {item.temperaturaMax}C°
-                      </Animated.Text>
-
-
-                    </View>
-
-
-
-                    <View style={styles.informacoes}>
-                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
-                        Temperatura Mínima
-                      </Animated.Text>
-
-                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
-                        {item.temperaturaMin}C°
-                      </Animated.Text>
-
-
-                    </View>
-
-
-
-                  </View>
-
-                </TouchableOpacity>
-
-              </>}
-            />) : (<FlatList
-              snapToInterval={width * 0.9 + 16}
-              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
-              disableIntervalMomentum
-              snapToAlignment="start"
-              decelerationRate={0.450}
+              decelerationRate={0.600}
               data={condicoesFuturas}
               style={styles.flatList}
               keyExtractor={(item) => item.data}
@@ -414,11 +319,10 @@ export default function HomeScreen() {
               renderItem={({ item }) => <>
                 <TouchableOpacity
                 onPress={() => {
-                  setDetalhes(!detalhes)
+                  navigation.navigate('Detalhes', item)
                 }}
                 >
-
-              
+                  
                   <View style={styles.conteudoPrevisao}>
                     <View style={styles.dataView}>
 
@@ -484,14 +388,52 @@ export default function HomeScreen() {
 
 
 
+                    <View style={styles.informacoes}>
+                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
+                        Índice UV
+                      </Animated.Text>
+
+                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
+                        {item.indiceUv}%
+                      </Animated.Text>
+
+
+                    </View>
+
+                     <View style={styles.informacoes}>
+                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
+                        Nascer do sol:
+                      </Animated.Text>
+
+                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
+                        {item.nascerSol}
+                      </Animated.Text>
+
+
+                    </View>
+
+
+                     <View style={styles.informacoes}>
+                      <Animated.Text style={[styles.informacaoTexto, { opacity: fadeAnim }]}>
+                        Índice UV
+                      </Animated.Text>
+
+                      <Animated.Text style={[styles.informacao, { opacity: fadeAnim }]}>
+                        {item.temperaturaMin}C°
+                      </Animated.Text>
+
+
+                    </View>
+
+
+
+
                   </View>
 
                 </TouchableOpacity>
 
               </>}
-            />)}
-
-            
+            />
 
 
 

@@ -7,6 +7,7 @@ import Login from '../Telas/Login';
 import Registro from '../Telas/Registro';
 import Inicial from '../Telas/Inicial';
 import Configs from '../Telas/Configs';
+import Detalhes from '../Telas/Detalhes';
 const Tab = createNativeStackNavigator();
 
 
@@ -34,6 +35,10 @@ export default function Rotas() {
 
         <Tab.Screen name="Configs" options={{ headerShown: false }}
         component={Configs}
+        />
+
+        <Tab.Screen name="Detalhes" options={{ headerShown: false }}
+        component={Detalhes}
         />
 
 
