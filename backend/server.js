@@ -6,7 +6,24 @@ const https = require('https'); // Importe o módulo nativo https
 require('dotenv').config();
 
 const httpsAgent = new https.Agent({  
-  rejectUnauthorized: false 
+  rejectUnauthorized: false
+});
+
+
+
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+require('dotenv').config();
+
+
+
+
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: `${process.env.MYSQL_PASSWORD}`,
+  database: "weather_db"
 });
 
 
@@ -14,24 +31,105 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: true }));
 
+
 app.get('/', (req, res) => {
   return res.status(200).json({
     mensagem: 'Sucesso na API',
   });
 });
 
-app.get('/api/:latitude/:longitude', async (req, res) => {
+
+
+
+const autenticarToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+
+
+  const token = authHeader && authHeader.split(' ')[1];
+  if(!token){
+    return res.status(401).json({ Mensagem: "Acesso negado: Token não fornecido" });
+  }
+
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
+    if(err){
+      return res.status(403).json({ Mensagem: "Token Inválido ou expirado"})
+    }
+
+
+    req.usuario = usuario;
+    next()
+  })
+}
+ 
+const middlewarePostUser = (req, res, next) => {
+  const { nome_usuario, email_usuario, senha_usuario } = req.body
+  if (!email_usuario || !senha_usuario || !nome_usuario) {
+    return res.status(400).json({
+      Mensagem: "Email e senha e nome são necessários"
+    })
+  };
+  console.log("Passou do middleware");
+  next();
+}
+
+
+const middlewareLogin = (req, res, next) => {
+  const { nome_usuario, email_usuario, senha_usuario } = req.body
+  if (!email_usuario || !senha_usuario) {
+    return res.status(400).json({
+      Mensagem: "Email e senha são necessários"
+    })
+  };
+  console.log("Passou do middleware");
+  next();
+}
+
+
+const token = null;
+const geradorToken = (id, email) => {
+  try{
+    const token = jwt.sign(
+      {
+        id: id,
+        email: email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '15m'
+      }
+    )
+    return token;
+
+
+  }catch(error){
+    console.error("Erro ao gerar token:", error);
+    return null;
+  }
+
+
+   
+
+
+    return token;
+}
+
+
+app.get('/api/:latitude/:longitude', autenticarToken, async (req, res) => {
   try {
     const latitude = Number(req.params.latitude);
     const longitude = Number(req.params.longitude);
+
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return res.status(400).json({ error: 'Parâmetros inválidos' });
     }
 
+
     const response = await axios.get(
       `https://api.weatherapi.com/v1/current.json?key=${process.env.TEMPERATURE_KEY}&q=${latitude},${longitude}&aqi=yes`
     );
+
 
     const data = response.data?.location?.localtime;
     const temperatura = response.data?.current?.temp_c;
@@ -42,6 +140,7 @@ app.get('/api/:latitude/:longitude', async (req, res) => {
     const qualidadeArCo = response.data?.current?.air_quality?.co;
     const qualidadeArNo2 = response.data?.current?.air_quality?.no2;
     const indiceUv = response.data?.current?.uv;
+
 
     return res.status(200).json({
       Data: data,
@@ -64,24 +163,34 @@ app.get('/api/:latitude/:longitude', async (req, res) => {
 
 
 
-app.get('/forecast/:latitude/:longitude', async (req, res) => {
+
+
+
+
+
+app.get('/forecast/:latitude/:longitude', autenticarToken, async (req, res) => {
   try {
     const latitude = Number(req.params.latitude);
     const longitude = Number(req.params.longitude);
+
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return res.status(400).json({ error: 'Parâmetros inválidos' });
     }
 
+
     const response = await axios.get(
       `https://api.weatherapi.com/v1/forecast.json?key=${process.env.TEMPERATURE_KEY}&q=${latitude},${longitude}&days=3&aqi=yes&alerts=no`
     );
+
 
     const dayOne = response.data?.forecast?.forecastday?.[0]
     const dayTwo = response.data?.forecast?.forecastday?.[1]
     const dayThree = response.data?.forecast?.forecastday?.[2]
 
+
     const informacoesDiaUm = {
+
 
       data: dayOne?.date,
       temperaturaMax: dayOne?.day?.maxtemp_c,
@@ -100,9 +209,12 @@ app.get('/forecast/:latitude/:longitude', async (req, res) => {
       porLua: dayOne?.astro?.monset,
       faseLua: dayOne?.astro?.moon_phase,
 
+
     };
 
+
     const informacoesDiaDois = {
+
 
       data: dayTwo?.date,
       temperaturaMax: dayTwo?.day?.maxtemp_c,
@@ -121,10 +233,14 @@ app.get('/forecast/:latitude/:longitude', async (req, res) => {
       porLua: dayTwo?.astro?.monset,
       faseLua: dayTwo?.astro?.moon_phase,
 
+
     };
 
 
+
+
     const informacoesDiaTres = {
+
 
       data: dayThree?.date,
       temperaturaMax: dayThree?.day?.maxtemp_c,
@@ -143,7 +259,13 @@ app.get('/forecast/:latitude/:longitude', async (req, res) => {
       porLua: dayThree?.astro?.monset,
       faseLua: dayThree?.astro?.moon_phase,
 
+
     };
+
+
+
+
+
 
 
 
@@ -163,18 +285,26 @@ app.get('/forecast/:latitude/:longitude', async (req, res) => {
 
 
 
-app.get('/revgeocoding/:latitude/:longitude', async (req, res) => {
+
+
+
+
+app.get('/revgeocoding/:latitude/:longitude', autenticarToken, async (req, res) => {
   try {
     const latitude = Number(req.params.latitude);
     const longitude = Number(req.params.longitude);
+
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return res.status(400).json({ error: 'Parâmetros inválidos' });
     }
 
+
     const response = await axios.get(`https://us1.locationiq.com/v1/reverse?key=${process.env.REVERSE_KEY}&lat=${latitude}&lon=${longitude}&format=json&`);
 
+
     const answer = response.data;
+
 
     const nomeCidade = answer?.address?.city || answer?.address?.town || answer?.address?.village || 'Cidade não encontrada';
     return res.status(200).json({
@@ -186,6 +316,7 @@ app.get('/revgeocoding/:latitude/:longitude', async (req, res) => {
   }
 });
 
+
 app.get('/quotes', async (req, res) => {
   try {
     const response = await axios.get('https://zenquotes.io/api/random/');
@@ -194,7 +325,9 @@ app.get('/quotes', async (req, res) => {
       autor: item.a,
     }));
 
+
     console.log(quote?.[0])
+
 
     return res.status(200).json({
       Quote: quote?.[0],
@@ -203,6 +336,7 @@ app.get('/quotes', async (req, res) => {
     return res.status(500).json({ error: 'Erro ao buscar citação' });
   }
 });
+
 
 app.post('/translate', async (req, res) => {
   const { text, targetLang } = req.body;
@@ -228,13 +362,15 @@ app.post('/translate', async (req, res) => {
   }
 });
 
-app.get('/quotes/translated', async (req, res) => {
+
+app.get('/quotes/translated', autenticarToken, async (req, res) => {
   try {
     const response = await axios.get('https://zenquotes.io/api/random/');
     const quote = response.data.map((item) => ({
       frase: item.q,
       autor: item.a,
     }));
+
 
     const translatedQuote = await axios.post(
       'https://api-free.deepl.com/v2/translate',
@@ -249,8 +385,10 @@ app.get('/quotes/translated', async (req, res) => {
         },
         httpsAgent: httpsAgent // Passa o agente aqui
 
+
       }
     )
+
 
     return res.status(200).json({
       Quote: translatedQuote.data.translations[0].text,
@@ -261,6 +399,88 @@ app.get('/quotes/translated', async (req, res) => {
     return res.status(500).json({ error: 'Erro ao buscar citação traduzida' });
   }
 })
+
+
+
+
+
+
+
+
+
+
+app.post('/usuarios', middlewarePostUser, async (req, res) => {
+  const { nome_usuario, email_usuario, senha_usuario } = req.body;
+
+
+  try {
+    const sql = "INSERT INTO usuarios (nome_usuario, email_usuario, senha_usuario) VALUES (?, ?, ?)";
+
+
+    const hash = await bcrypt.hash(senha_usuario, 10);
+
+
+    const [response] = await pool.query(sql, [nome_usuario, email_usuario, hash]);
+
+
+    return res.status(201).json({
+      Mensagem: "Usuário postado com sucesso",
+      id_usuario: response.insertId
+    });
+
+
+  } catch (error) {
+    console.error("Erro no cadastro de usuário:", error);
+    return res.status(500).json({ Mensagem: "Erro ao postar usuário", detalhe: error.message });
+  }
+});
+
+
+app.post('/auth/usuarios', middlewareLogin, async (req, res) => {
+  const { email_usuario, senha_usuario } = req.body;
+
+
+  try {
+    const sql = "SELECT senha_usuario, id_usuario FROM usuarios WHERE email_usuario = ?";
+
+
+    const [response] = await pool.query(sql, [email_usuario])
+
+
+    if (!response) {
+      return res.status(401).json({ Mensagem: "Email ou senha inválidos"});
+    }
+    const data = response[0];
+
+
+    const verificacao = await bcrypt.compare(senha_usuario, data.senha_usuario);
+    if (!verificacao) {
+      return res.status(401).json({ Mensagem: "Email ou senha inválidos"});
+    }
+
+
+    const token = geradorToken(data.id_usuario, email_usuario);
+
+
+    if (token) {
+      return res.status(200).json({
+        Mensagem: "login feito com sucesso",
+        token: token
+       
+      })
+    }
+
+
+    return;
+  } catch (error) {
+    console.error("Erro no cadastro de usuário:", error);
+    return res.status(500).json({ Mensagem: "Erro ao postar usuário", detalhe: error.message });
+  }
+
+
+});
+
+
 
 
 app.listen(3000, () => {
