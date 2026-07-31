@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 
-import BASE_URL from '../UrlBase';
+import api from '../Api';
 
-const RegistroLogin = create((set) => ({
+import { authStorage } from '../ArmazenamentoToken/AuthStorage';
 
-    logado: false,
+
+const useAuthStore = create((set) => ({
     token: null,
+    estaAutenticado: false,
+
 
     fazRegistro: async (nome_usuario, email_usuario, senha_usuario) => {
         if (!nome_usuario || !email_usuario || !senha_usuario) {
@@ -15,7 +18,7 @@ const RegistroLogin = create((set) => ({
         }
 
         try {
-            const response = await fetch(`${BASE_URL}/usuarios`,
+            const response = await api.post(`/usuarios`,
                 {
                     method: "POST",
                     headers: {
@@ -30,9 +33,8 @@ const RegistroLogin = create((set) => ({
 
             );
 
-            () => {
-                get().login(email_usuario, senha_usuario)
-            }
+            await get().fazLogin(email_usuario, senha_usuario);
+
                         
             
 
@@ -50,30 +52,45 @@ const RegistroLogin = create((set) => ({
         }
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/usuarios`,
+            const response = await api.post(`/auth/usuarios`,
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify ({
-                        email_usuario,
-                        senha_usuario,
-                    })
+                    email_usuario,
+                    senha_usuario
                 }
 
             );
 
-            const answer = await response.json();
-            set({ token: answer.token});
+
+            const tokenRecebido = response.data.token;
+
+            if(tokenRecebido){
+                await authStorage.saveToken(tokenRecebido);
+                set({ token: tokenRecebido, estaAutenticado: true })
+            }
+            
+            
 
         } catch (err) {
             console.warn('Erro ao fazer Login:', err);
         }
     },
 
+    carregarTokenSalvo: async () => {
+        const token = await authStorage.getToken();
+        if(token){
+            set({token, estaAutenticado: true});
+        }
+    },
+
+    fazLogout: async () => {
+        await authStorage.removeToken();
+        set({ token: null, estaAutenticado: false })
+    }
+
+
+
 }
 )
 )
 
-export default RegistroLogin
+export default useAuthStore;

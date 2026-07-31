@@ -2,13 +2,16 @@ import { create } from 'zustand';
 
 import BASE_URL from '../UrlBase';
 
+import api from '../Api';
+
+
 const QuotesAndTranslation = create((set) => ({
 
   frase: null,
 
   pegaFrase: async () => {
     try {
-      const response = await fetch(`${BASE_URL}/quotes/translated`);
+      const response = await api.get(`${BASE_URL}/quotes/translated`);
 
       if (!response.ok) {
         throw new Error(`Falha na requisição: ${response.status}`);

@@ -2,6 +2,9 @@ import { create } from 'zustand';
 
 import BASE_URL from '../UrlBase';
 
+import api from '../Api';
+
+
 const OpenMeteoApi = create((set) => ({
   condicoes: {
     data: null,
@@ -83,7 +86,7 @@ const OpenMeteoApi = create((set) => ({
 
   pegaTemperatura: async (latitude, longitude) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/${latitude}/${longitude}`);
+      const response = await api.get(`${BASE_URL}/api/${latitude}/${longitude}`);
 
       if (!response.ok) {
         throw new Error(`Falha na requisição: ${response.status}`);
@@ -111,7 +114,7 @@ const OpenMeteoApi = create((set) => ({
 
   pegaCondicoes: async (latitude, longitude) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/${latitude}/${longitude}`);
+      const response = await api.get(`${BASE_URL}/api/${latitude}/${longitude}`);
 
       if (!response.ok) {
         throw new Error(`Falha na requisição: ${response.status}`);
@@ -127,7 +130,7 @@ const OpenMeteoApi = create((set) => ({
 
   pegaPrevisao: async (latitude, longitude) => {
     try {
-      const response = await fetch(`${BASE_URL}/forecast/${latitude}/${longitude}`);
+      const response = await api.get(`${BASE_URL}/forecast/${latitude}/${longitude}`);
 
       if (!response.ok) {
         throw new Error(`Falha na requisição: ${response.status}`);

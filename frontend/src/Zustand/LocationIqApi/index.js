@@ -2,13 +2,15 @@ import { create } from 'zustand';
 
 import BASE_URL from '../UrlBase';
 
+import api from '../Api';
+
 const LocationIqApi = create((set) => ({
 
   cidade: null,
 
   pegaCidade: async (latitude, longitude) => {
     try {
-      const response = await fetch(`${BASE_URL}/revgeocoding/${latitude}/${longitude}`);
+      const response = await api.get(`${BASE_URL}/revgeocoding/${latitude}/${longitude}`);
 
       if (!response.ok) {
         throw new Error(`Falha na requisição: ${response.status}`);
