@@ -484,6 +484,6 @@ app.post('/auth/usuarios', middlewareLogin, async (req, res) => {
 
 
 app.listen(3002, () => {
-  console.log('API funcionando em http://localhost:3002');
+  console.log('API funcionando em http://localhost:3002!');
 });
 
