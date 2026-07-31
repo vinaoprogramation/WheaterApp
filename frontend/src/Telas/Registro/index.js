@@ -1,40 +1,36 @@
-import React, { useEffect, useState } from "react";
-
-import { Text, View, ScrollView, TextInput, TouchableOpacity, Image } from "react-native";
-
-import styles from "./styles";
-
-import solFundo from '../../../assets/solFundo.jpg';
+import React, { useEffect, useState } from 'react';
+import { Text, View, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import styles from './styles';
 import montanhasFundo from '../../../assets/montanhasFundo.jpg';
-
-
-import RegistroLogin from "../../Zustand/RegistroLogin";
-
+import RegistroLogin from '../../Zustand/RegistroLogin';
 import serenoLogo from '../../../assets/serenoLogo.png';
-export default function Registro({navigation}) {
 
+export default function Registro({ navigation }) {
   const fazRegistro = RegistroLogin((state) => state.fazRegistro);
-
-  const logado = RegistroLogin((state) => state.logado);
+  const estaAutenticado = RegistroLogin((state) => state.estaAutenticado);
+  const erro = RegistroLogin((state) => state.erro);
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [nome, setNome] = useState('');
 
-
-    const registra = (nome, email, senha) => {
-      if(!nome || !email || !senha){
-        alert("Email e senha e nomesão necessários")
-      }
-      registra(nome, email, senha)  
+  const registra = async (nomeDigitado, emailDigitado, senhaDigitada) => {
+    if (!nomeDigitado || !emailDigitado || !senhaDigitada) {
+      Alert.alert('Atenção', 'Nome, email e senha são necessários.');
+      return;
     }
-  
-    useEffect(() => {
-      if(logado){
-        navigation.navigate('HomeScreen')
-      }
-      
-    }, [logado])
+
+    const sucesso = await fazRegistro(nomeDigitado, emailDigitado, senhaDigitada);
+    if (!sucesso && erro) {
+      Alert.alert('Falha no cadastro', erro);
+    }
+  };
+
+  useEffect(() => {
+    if (estaAutenticado) {
+      navigation.navigate('HomeScreen');
+    }
+  }, [estaAutenticado, navigation]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
@@ -77,7 +73,7 @@ export default function Registro({navigation}) {
 
 
         <TouchableOpacity style={styles.botao} onPress={() => {
-          fazRegistro(nome, email, senha)
+          registra(nome, email, senha)
            }}>
           <Text style={styles.textoBotao}>Registrar</Text>
         </TouchableOpacity>

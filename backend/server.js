@@ -26,6 +26,9 @@ const pool = mysql.createPool({
   database: "weather_db"
 });
 
+const corsOptions = {
+  origin: ["http://localhost:8081", "http://192.168.1.11:8081"]
+}
 
 const app = express();
 app.use(express.json());
@@ -75,44 +78,24 @@ const middlewarePostUser = (req, res, next) => {
 
 
 const middlewareLogin = (req, res, next) => {
-  const { nome_usuario, email_usuario, senha_usuario } = req.body
+  const { email_usuario, senha_usuario } = req.body;
   if (!email_usuario || !senha_usuario) {
     return res.status(400).json({
-      Mensagem: "Email e senha são necessários"
-    })
-  };
-  console.log("Passou do middleware");
-  next();
-}
-
-
-const token = null;
-const geradorToken = (id, email) => {
-  try{
-    const token = jwt.sign(
-      {
-        id: id,
-        email: email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '15m'
-      }
-    )
-    return token;
-
-
-  }catch(error){
-    console.error("Erro ao gerar token:", error);
-    return null;
+      Mensagem: 'Email e senha são necessários'
+    });
   }
 
+  next();
+};
 
-   
-
-
-    return token;
-}
+const geradorToken = (id, email) => {
+  try {
+    return jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  } catch (error) {
+    console.error('Erro ao gerar token:', error);
+    return null;
+  }
+};
 
 
 app.get('/api/:latitude/:longitude', autenticarToken, async (req, res) => {
@@ -439,51 +422,40 @@ app.post('/usuarios', middlewarePostUser, async (req, res) => {
 app.post('/auth/usuarios', middlewareLogin, async (req, res) => {
   const { email_usuario, senha_usuario } = req.body;
 
-
   try {
-    const sql = "SELECT senha_usuario, id_usuario FROM usuarios WHERE email_usuario = ?";
+    const sql = 'SELECT senha_usuario, id_usuario FROM usuarios WHERE email_usuario = ?';
+    const [response] = await pool.query(sql, [email_usuario]);
+    const data = response?.[0];
 
-
-    const [response] = await pool.query(sql, [email_usuario])
-
-
-    if (!response) {
-      return res.status(401).json({ Mensagem: "Email ou senha inválidos"});
+    if (!data) {
+      return res.status(401).json({ Mensagem: 'Email ou senha inválidos' });
     }
-    const data = response[0];
-
 
     const verificacao = await bcrypt.compare(senha_usuario, data.senha_usuario);
     if (!verificacao) {
-      return res.status(401).json({ Mensagem: "Email ou senha inválidos"});
+      return res.status(401).json({ Mensagem: 'Email ou senha inválidos' });
     }
-
 
     const token = geradorToken(data.id_usuario, email_usuario);
-
-
     if (token) {
       return res.status(200).json({
-        Mensagem: "login feito com sucesso",
-        token: token
-       
-      })
+        Mensagem: 'login feito com sucesso',
+        token
+      });
     }
 
-
-    return;
+    return res.status(500).json({ Mensagem: 'Erro ao gerar token' });
   } catch (error) {
-    console.error("Erro no cadastro de usuário:", error);
-    return res.status(500).json({ Mensagem: "Erro ao postar usuário", detalhe: error.message });
+    console.error('Erro no login de usuário:', error);
+    return res.status(500).json({ Mensagem: 'Erro ao autenticar usuário', detalhe: error.message });
   }
-
-
 });
 
+if (require.main === module) {
+  app.listen(3002, () => {
+    console.log('API funcionando em http://localhost:3002!');
+  });
+}
 
-
-
-app.listen(3002, () => {
-  console.log('API funcionando em http://localhost:3002!');
-});
+module.exports = { app, pool };
 

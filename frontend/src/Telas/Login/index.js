@@ -1,35 +1,35 @@
-import React, { useEffect, useState } from "react";
-
-import { Text, View, ScrollView, TextInput, TouchableOpacity, Image } from "react-native";
-
-import styles from "./styles";
-
+import React, { useEffect, useState } from 'react';
+import { Text, View, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import styles from './styles';
 import ImagemFundo from '../../../assets/imagemFundo.jpg';
-
-import RegistroLogin from "../../Zustand/RegistroLogin";
-
+import RegistroLogin from '../../Zustand/RegistroLogin';
 import serenoLogo from '../../../assets/serenoLogo.png';
-export default function Login({navigation}) {
+
+export default function Login({ navigation }) {
   const fazLogin = RegistroLogin((state) => state.fazLogin);
-
-  const logado = RegistroLogin((state) => state.logado);
-
+  const estaAutenticado = RegistroLogin((state) => state.estaAutenticado);
+  const erro = RegistroLogin((state) => state.erro);
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const loga = (email, senha) => {
-    if(!email || !senha){
-      alert("Email e senha são necessários")
+  const loga = async (emailDigitado, senhaDigitada) => {
+    if (!emailDigitado || !senhaDigitada) {
+      Alert.alert('Atenção', 'Email e senha são necessários.');
+      return;
     }
-    fazLogin(email, senha)  
-  }
+
+    const sucesso = await fazLogin(emailDigitado, senhaDigitada);
+    if (!sucesso) {
+      Alert.alert('Falha no login', erro || 'Não foi possível fazer login.');
+    }
+  };
 
   useEffect(() => {
-    if(logado){
-      navigation.navigate('HomeScreen')
+    if (estaAutenticado) {
+      navigation.navigate('HomeScreen');
     }
-  }, [logado])
+  }, [estaAutenticado, navigation]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>

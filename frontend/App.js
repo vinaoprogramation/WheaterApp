@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect } from 'react';
+import Rotas from './src/Rotas';
+import useAuthStore from './src/Zustand/RegistroLogin';
 
-import Rotas from "./src/Rotas";
-export default function App(){
-  return(
-    <Rotas/>
-  )
+export default function App() {
+  const carregarTokenSalvo = useAuthStore((state) => state.carregarTokenSalvo);
+
+  useEffect(() => {
+    carregarTokenSalvo();
+  }, [carregarTokenSalvo]);
+
+  return <Rotas />;
 }
